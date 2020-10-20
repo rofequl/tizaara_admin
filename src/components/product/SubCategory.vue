@@ -16,49 +16,23 @@
     <!-- End Page Header -->
 
     <!-- Datatable -->
-    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper no-footer my-5">
-      <vue-element-loading :active="loadActive" background-color="white" spinner="bar-fade-scale"/>
-      <div class="dataTables_length"><label>Show
-        <select v-model="tableData.length" @change="loadData()">
-          <option v-for="(records, index) in perPage" :key="index" :value="records">{{ records }}</option>
-        </select>
-        entries</label></div>
-      <div class="dataTables_filter">
-        <label>Search:
-          <input type="search" v-model="tableData.search" @input="loadData()">
-        </label>
-      </div>
-      <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
-        <tbody>
-        <tr role="row" class="odd" v-for="(project, i) in projects.data" :key="project.id">
-          <td>{{ i + serial_no }}</td>
-          <td>{{ project.name }}</td>
-          <td>{{ project.category.name }}</td>
-          <td>
-            <CButtonGroup size="sm" class="mx-1">
-              <CButton color="secondary" @click="openModalEdit(project)">
-                <font-awesome-icon icon="edit"/>
-              </CButton>
-              <CButton color="secondary" @click="deleteSubcategory(project.id)">
-                <font-awesome-icon icon="trash-alt"/>
-              </CButton>
-            </CButtonGroup>
-          </td>
-        </tr>
-        </tbody>
-      </datatable>
-      <div class="dataTables_footer">
-        <div class="dataTables_info">
-          Showing {{ projects.from }} to {{ projects.to }} of {{ projects.total }} entries
+    <div id="people" class="dataTables_wrapper no-footer my-5">
+      <v-client-table :data="Object.values(subcategoryList)" :columns="columns" class="text-center" :options="options">
+        <div slot="serial" slot-scope="props">
+          {{ props.index }}
         </div>
-        <div class="dataTables_paginate paging_simple_numbers">
-          <pagination :data="projects" :show-disabled="true" :align="align" :limit="2"
-                      @pagination-change-page="loadData">
-            <span slot="prev-nav">Previous</span>
-            <span slot="next-nav">Next</span>
-          </pagination>
+
+        <div slot="action" slot-scope="props">
+          <CButtonGroup size="sm" class="mx-1">
+            <CButton color="secondary" @click="openModalEdit(props.row)">
+              <font-awesome-icon icon="edit"/>
+            </CButton>
+            <CButton color="secondary" @click="deleteSubcategory(props.row.id)">
+              <font-awesome-icon icon="trash-alt"/>
+            </CButton>
+          </CButtonGroup>
         </div>
-      </div>
+      </v-client-table>
     </div>
     <!-- End Datatable -->
 
@@ -66,7 +40,9 @@
     <!-- Modal -->
     <b-modal id="adminModal" :title="editMode ? 'Sub-Category Information Edit': 'New Sub-Category Add'" hide-footer>
       <b-form @submit.prevent="editMode ? updateSubcategory(): createSubcategory()" @keydown="form.onKeydown($event)">
-        <b-form-group>
+        <b-form-group label="Subcategory Name :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               class="form-control form-control-solid h-auto"
               :class="{ 'is-invalid': form.errors.has('name')}"
@@ -74,7 +50,6 @@
               v-model="$v.form.name.$model"
               placeholder="Subcategory Name"
               :state="validateState('name')"
-              aria-describedby="BrandName"
           ></b-form-input>
           <b-form-invalid-feedback v-if="!$v.form.name.required">
             Subcategory name required.
@@ -84,27 +59,23 @@
           </b-form-invalid-feedback>
           <has-error :form="form" field="name"></has-error>
         </b-form-group>
-        <b-form-group>
-          <v-select v-model="$v.form.category_id.$model" :options="category" label="name"
-                    :reduce="name => name.id"
-                    placeholder="Select Category"
-          >
-            <template #search="{attributes, events}">
-              <input
-                  class="vs__search is-invalid"
-                  v-bind="attributes"
-                  :required="!$v.form.category_id.$model"
-                  v-on="events"
-                  :state="validateState('category_id')"
-              />
+        <b-form-group label="Select Category :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
+          <b-form-select v-model="$v.form.category_id.$model" :options="Object.values(categoryList)"
+                         :state="validateState('category_id')" value-field="id"
+                         text-field="name">
+            <template v-slot:first>
+              <b-form-select-option value="" disabled>-- Please select Category --</b-form-select-option>
             </template>
-            <template #option="{ name, icon }">
-              <img :src="getProfilePhoto(icon)" class="mx-2" width="18px" height="18px">
-              <em>{{ name }}</em>
-            </template>
-          </v-select>
+          </b-form-select>
+          <b-form-invalid-feedback v-if="!$v.form.category_id.required">
+            Category required.
+          </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Title :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               v-model="$v.form.meta_title.$model"
               :state="validateState('meta_title')"
@@ -114,7 +85,9 @@
             Meta title maximum 255 character.
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Description :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-textarea
               id="textarea"
               v-model="form.meta_description"
@@ -125,6 +98,9 @@
         <CRow class="justify-content-end">
           <CCol col="4" sm="4" md="3" class="mb-3 mb-xl-0">
             <CButton block color="info" type="submit" :disabled="form.busy">
+              <span v-if="form.busy" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+              <span v-if="form.busy" class="sr-only">Loading...</span>
               {{ editMode ? 'Update' : 'Submit' }}
             </CButton>
           </CCol>
@@ -139,28 +115,22 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import {validationMixin} from "vuelidate";
 import {required, maxLength} from "vuelidate/lib/validators";
-import ApiService from "@/core/services/api.service";
-import Datatable from "../helper/Datatable";
 import {api_base_url} from "@/core/config/app";
+import {CATEGORY_LIST} from "@/core/services/store/module/category";
+import {
+  SUBCATEGORY_ADD,
+  SUBCATEGORY_LIST,
+  SUBCATEGORY_MODIFY,
+  SUBCATEGORY_REMOVE
+} from "@/core/services/store/module/subcategory";
 
 export default {
   mixins: [validationMixin],
   name: "SubCategory",
   data() {
-    let sortOrders = {};
-
-    let columns = [
-      {label: '#', name: '#'},
-      {label: 'Sub-Category Name', name: 'name'},
-      {label: 'Category Name', name: 'category_id'},
-      {label: 'Action', name: false}
-    ];
-
-    columns.forEach((column) => {
-      sortOrders[column.name] = -1;
-    });
     return {
       validation: true,
       validation2: true,
@@ -173,21 +143,15 @@ export default {
         slug: '',
         meta_description: ''
       }),
-      loadActive: false,
-      projects: {},
-      category: [],
-      columns: columns,
-      columns_exist: ['name', 'banner', 'icon'],
-      sortKey: 'deadline',
-      sortOrders: sortOrders,
-      perPage: ['10', '20', '50'],
-      align: 'right',
-      tableData: {
-        draw: 0,
-        length: 10,
-        search: '',
-        column: 0,
-        dir: 'desc',
+      columns: ['serial', 'name', 'categoryName', 'action'],
+      options: {
+        headings: {
+          serial: '#',
+          name: 'Sub-Category Name',
+          categoryName: 'Category Name',
+        },
+        sortable: ['name', 'categoryName'],
+        filterable: ['name', 'categoryName']
       }
     }
   },
@@ -204,9 +168,6 @@ export default {
         required
       }
     }
-  },
-  components: {
-    datatable: Datatable
   },
   methods: {
     getProfilePhoto(e) {
@@ -234,54 +195,14 @@ export default {
       this.editMode = true;
       this.$bvModal.show('adminModal');
     },
-    loadCategory() {
-      var that = this;
-      ApiService.get('category')
-          .then(function (data) {
-            that.category = data.data;
-          })
-          .catch(({response}) => {
-            console.log(response);
-          });
-    },
-    loadData(page = 1) {
-      this.loadActive = true;
-      this.projects = {};
-      let url = 'subcategory?page=' + page;
-      this.tableData.draw++;
-      ApiService.get(url, '', {params: this.tableData})
-          .then(({data}) => {
-            this.loadActive = false;
-            let response = data.data;
-            if (this.tableData.draw == data.draw) {
-              this.projects = response;
-              this.serial_no = response.from;
-            }
-          })
-          .catch(({response}) => {
-
-          });
-    },
-    sortBy(key) {
-      if (this.columns_exist.indexOf(key) === -1)
-        return true;
-      this.sortKey = key;
-      this.sortOrders[key] = this.sortOrders[key] * -1;
-      this.tableData.column = this.getIndex(this.columns, 'name', key);
-      this.tableData.dir = this.sortOrders[key] === 1 ? 'asc' : 'desc';
-      this.loadData();
-    },
-    getIndex(array, key, value) {
-      return array.findIndex(i => i[key] == value)
-    },
     createSubcategory() {
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         return;
       }
       this.form.post('subcategory')
-          .then((e) => {
-            this.loadData();
+          .then(({data}) => {
+            this.$store.commit(SUBCATEGORY_ADD, data);
             this.form.reset();
             this.validation = true;
             this.$bvModal.hide('adminModal');
@@ -300,8 +221,8 @@ export default {
         return;
       }
       this.form.put('subcategory/' + this.form.id)
-          .then((e) => {
-            this.loadData();
+          .then(({data}) => {
+            this.$store.commit(SUBCATEGORY_MODIFY, data);
             this.form.reset();
             this.validation = true;
             this.$bvModal.hide('adminModal');
@@ -327,14 +248,16 @@ export default {
         if (result.value) {
           this.form.delete('subcategory/' + id)
               .then((data) => {
-                this.loadData();
-                setTimeout(() => {
+                if (data.data.result === 'Error') {
+                  swal.fire("Failed!", data.data.message, 'warning')
+                } else {
                   swal.fire(
                       'Deleted!',
                       'Sub-Category has been deleted.',
                       'success'
                   )
-                }, 1000);
+                  this.$store.commit(SUBCATEGORY_REMOVE, id);
+                }
               })
               .catch(() => {
                 swal("Failed!", 'There was something wrong.', 'warning')
@@ -342,17 +265,17 @@ export default {
         }
       })
     },
-
   },
   created() {
-    this.loadData();
-    this.loadCategory();
-  }
+    this.$store.dispatch(SUBCATEGORY_LIST)
+    this.$store.dispatch(CATEGORY_LIST)
+  },
+  computed: {
+    ...mapGetters(["subcategoryList", "categoryList"])
+  },
 }
 </script>
 
 <style scoped>
-.select2-container--open {
-  z-index: 9999999
-}
+
 </style>

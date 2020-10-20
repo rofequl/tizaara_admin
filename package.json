@@ -32,6 +32,7 @@
     "auto-changelog": "auto-changelog  --hide-credit --commit-limit false --package --backfill-limit 0 --starting-version 3.0.0-beta.0"
   },
   "dependencies": {
+    "@andresouzaabreu/vue-data-table": "^2.2.3",
     "@ckeditor/ckeditor5-build-classic": "^22.0.0",
     "@ckeditor/ckeditor5-vue": "^1.0.3",
     "@coreui/coreui": "^3.3.0",
@@ -58,6 +59,7 @@
     "vue-form-wizard": "^0.8.4",
     "vue-router": "~3.3.4",
     "vue-select": "^3.10.8",
+    "vue-tables-2": "^2.1.46",
     "vue-upload-multiple-image": "^1.1.6",
     "vue2-perfect-scrollbar": "^1.5.0",
     "vuelidate": "^0.7.5",

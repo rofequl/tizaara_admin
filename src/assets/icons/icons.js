@@ -187,7 +187,8 @@ import {
     faPlus,
     faSearch,
     faMailBulk,
-    faPhone
+    faPhone,
+    faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -199,5 +200,6 @@ library.add(
     faPlus,
     faSearch,
     faMailBulk,
-    faPhone
+    faPhone,
+    faCheckCircle
 );

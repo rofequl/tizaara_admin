@@ -118,15 +118,11 @@ Vue.component('pagination', require('laravel-vue-pagination'));
 
 Vue.component('vue-element-loading', VueElementLoading);
 
+import {ClientTable} from 'vue-tables-2';
+
+Vue.use(ClientTable, {}, false, 'bootstrap4', {});
+
 router.beforeEach((to, from, next) => {
-    // const publicPages = ['/login'];
-    // const authRequired = !publicPages.includes(to.path);
-    // const loggedIn = store.state.auth.isAuthenticated;
-    // if (authRequired && !loggedIn) {
-    //     next('/login');
-    // } else {
-    //     next();
-    // }
     Promise.all([store.dispatch(VERIFY_AUTH)]).then(next);
     setTimeout(() => {
         window.scrollTo(0, 0);

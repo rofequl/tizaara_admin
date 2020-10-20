@@ -55,6 +55,12 @@ export default new Router({
                     component: () => import("@/components/product/Property")
                 },
                 {
+                    meta: {title: 'Create New Properties'},
+                    path: "/product/properties-create",
+                    name: "New Properties",
+                    component: () => import("@/components/product/product/PropertyCreate")
+                },
+                {
                     meta: {title: 'In House Products'},
                     path: "/product/product-admin",
                     name: "In House Products",

@@ -3,6 +3,10 @@ import Vuex from 'vuex'
 import auth from './auth.module';
 import general from './general.module';
 import user from './user.module';
+import brand from './module/brand';
+import category from './module/category';
+import subcategory from './module/subcategory';
+import subsubcategory from './module/subsubcategory';
 
 Vue.use(Vuex)
 
@@ -43,6 +47,10 @@ export default new Vuex.Store({
     modules: {
         auth,
         general,
-        user
+        user,
+        brand,
+        category,
+        subcategory,
+        subsubcategory,
     }
 })

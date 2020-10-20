@@ -16,57 +16,37 @@
     <!-- End Page Header -->
 
     <!-- Datatable -->
-    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper no-footer my-5">
-      <vue-element-loading :active="loadActive" background-color="white" spinner="bar-fade-scale"/>
-      <div class="dataTables_length"><label>Show
-        <select v-model="tableData.length" @change="loadData()">
-          <option v-for="(records, index) in perPage" :key="index" :value="records">{{ records }}</option>
-        </select>
-        entries</label></div>
-      <div class="dataTables_filter">
-        <label>Search:
-          <input type="search" v-model="tableData.search" @input="loadData()">
-        </label>
-      </div>
-      <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
-        <tbody>
-        <tr role="row" class="odd" v-for="(project, i) in projects.data" :key="project.id">
-          <td>{{ i + serial_no }}</td>
-          <td>{{ project.name }}</td>
-          <td><img :src="getProfilePhoto(project.banner)" v-if="project.banner" class="border" width="80px"></td>
-          <td><img :src="getProfilePhoto(project.icon)" v-if="project.icon" class="border" width="80px"></td>
-          <td>
-            <CButtonGroup size="sm" class="mx-1">
-              <CButton color="secondary" @click="openModalEdit(project)">
-                <font-awesome-icon icon="edit"/>
-              </CButton>
-              <CButton color="secondary" @click="deleteCategory(project.id)">
-                <font-awesome-icon icon="trash-alt"/>
-              </CButton>
-            </CButtonGroup>
-          </td>
-        </tr>
-        </tbody>
-      </datatable>
-      <div class="dataTables_footer">
-        <div class="dataTables_info">
-          Showing {{ projects.from }} to {{ projects.to }} of {{ projects.total }} entries
+    <div id="people" class="dataTables_wrapper no-footer my-5">
+      <v-client-table :data="Object.values(categoryList)" :columns="columns" class="text-center" :options="options">
+        <div slot="serial" slot-scope="props">
+          {{ props.index }}
         </div>
-        <div class="dataTables_paginate paging_simple_numbers">
-          <pagination :data="projects" :show-disabled="true" :align="align" :limit="2"
-                      @pagination-change-page="loadData">
-            <span slot="prev-nav">Previous</span>
-            <span slot="next-nav">Next</span>
-          </pagination>
+        <div slot="banner" slot-scope="props">
+          <img v-lazy="getProfilePhoto(props.row.banner)" class="border" width="80px">
         </div>
-      </div>
+        <div slot="icon" slot-scope="props">
+          <img v-lazy="getProfilePhoto(props.row.icon)" class="border" width="80px">
+        </div>
+        <div slot="action" slot-scope="props">
+          <CButtonGroup size="sm" class="mx-1">
+            <CButton color="secondary" @click="openModalEdit(props.row)">
+              <font-awesome-icon icon="edit"/>
+            </CButton>
+            <CButton color="secondary" @click="deleteCategory(props.row.id)">
+              <font-awesome-icon icon="trash-alt"/>
+            </CButton>
+          </CButtonGroup>
+        </div>
+      </v-client-table>
     </div>
     <!-- End Datatable -->
 
     <!-- Modal -->
     <b-modal id="adminModal" :title="editMode ? 'Category Information Edit': 'New Category Add'" hide-footer>
       <b-form @submit.prevent="editMode ? updateCategory(): createCategory()" @keydown="form.onKeydown($event)">
-        <b-form-group>
+        <b-form-group label="Category Name :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               class="form-control form-control-solid h-auto"
               :class="{ 'is-invalid': form.errors.has('name')}"
@@ -84,7 +64,9 @@
           </b-form-invalid-feedback>
           <has-error :form="form" field="name"></has-error>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Category banner :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-file
               accept="image/jpeg, image/png, image/jpg"
               placeholder="Choose category banner 200x300"
@@ -92,15 +74,22 @@
           ></b-form-file>
           <b-form-invalid-feedback id="fileErrorText" :state="validation"></b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Category icon :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-file
               accept="image/jpeg, image/png, image/jpg"
               placeholder="Choose category icon 32x32"
-              @change="onInputChange2"
+              @change="onInputChange2" :state="validateState('icon')"
           ></b-form-file>
+          <b-form-invalid-feedback v-if="!$v.form.icon.required">
+            Category icon required.
+          </b-form-invalid-feedback>
           <b-form-invalid-feedback id="fileErrorText2" :state="validation2"></b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Title :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               v-model="$v.form.meta_title.$model"
               :state="validateState('meta_title')"
@@ -110,7 +99,9 @@
             Meta title maximum 255 character.
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Description :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-textarea
               id="textarea"
               v-model="form.meta_description"
@@ -121,6 +112,9 @@
         <CRow class="justify-content-end">
           <CCol col="4" sm="4" md="3" class="mb-3 mb-xl-0">
             <CButton block color="info" type="submit" :disabled="form.busy">
+              <span v-if="form.busy" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+              <span v-if="form.busy" class="sr-only">Loading...</span>
               {{ editMode ? 'Update' : 'Submit' }}
             </CButton>
           </CCol>
@@ -135,35 +129,22 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import {validationMixin} from "vuelidate";
 import {required, maxLength} from "vuelidate/lib/validators";
-import ApiService from "@/core/services/api.service";
-import Datatable from "../helper/Datatable";
 import {api_base_url} from "@/core/config/app";
+import {CATEGORY_ADD, CATEGORY_LIST, CATEGORY_MODIFY, CATEGORY_REMOVE} from "@/core/services/store/module/category";
 
 export default {
   mixins: [validationMixin],
   name: "Category",
   data() {
-    let sortOrders = {};
-
-    let columns = [
-      {label: '#', name: '#'},
-      {label: 'Category Name', name: 'name'},
-      {label: 'Banner', name: 'banner'},
-      {label: 'Icon', name: 'icon'},
-      {label: 'Action', name: false}
-    ];
-
-    columns.forEach((column) => {
-      sortOrders[column.name] = -1;
-    });
     return {
       validation: true,
       validation2: true,
       editMode: false,
       form: new Form({
-        id:'',
+        id: '',
         name: '',
         commision_rate: '',
         banner: '',
@@ -172,21 +153,15 @@ export default {
         slug: '',
         meta_description: ''
       }),
-      loadActive: false,
-      projects: {},
-      columns: columns,
-      columns_exist: ['name', 'banner', 'icon'],
-      sortKey: 'deadline',
-      sortOrders: sortOrders,
-      perPage: ['10', '20', '50'],
-      align: 'right',
-      tableData: {
-        draw: 0,
-        length: 10,
-        search: '',
-        column: 0,
-        dir: 'desc',
-      },
+      columns: ['serial', 'name', 'banner', 'icon', 'action'],
+      options: {
+        headings: {
+          serial: '#',
+          name: 'Category Name',
+        },
+        sortable: ['name'],
+        filterable: ['name']
+      }
     }
   },
   validations: {
@@ -197,11 +172,11 @@ export default {
       },
       meta_title: {
         maxLength: maxLength(255)
+      },
+      icon: {
+        required,
       }
     }
-  },
-  components: {
-    datatable: Datatable
   },
   methods: {
     getProfilePhoto(e) {
@@ -249,7 +224,7 @@ export default {
       }
       reader.readAsDataURL(files);
     },
-    openModal(){
+    openModal() {
       this.validation = true;
       this.$v.$reset();
       this.form.reset();
@@ -257,7 +232,7 @@ export default {
       this.editMode = false;
       this.$bvModal.show('adminModal');
     },
-    openModalEdit(data){
+    openModalEdit(data) {
       this.validation = true;
       this.$v.$reset();
       this.form.reset();
@@ -266,14 +241,14 @@ export default {
       this.editMode = true;
       this.$bvModal.show('adminModal');
     },
-    createCategory(){
+    createCategory() {
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         return;
       }
       this.form.post('category')
-          .then((e) => {
-            this.loadData();
+          .then(({data}) => {
+            this.$store.commit(CATEGORY_ADD, data);
             this.form.reset();
             this.validation = true;
             this.$bvModal.hide('adminModal');
@@ -282,18 +257,15 @@ export default {
               title: 'Category Add successfully'
             });
           })
-          .catch((e) => {
-
-          })
     },
-    updateCategory(){
+    updateCategory() {
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         return;
       }
-      this.form.put('category/'+ this.form.id)
-          .then((e) => {
-            this.loadData();
+      this.form.put('category/' + this.form.id)
+          .then(({data}) => {
+            this.$store.commit(CATEGORY_MODIFY, data);
             this.form.reset();
             this.validation = true;
             this.$bvModal.hide('adminModal');
@@ -301,40 +273,7 @@ export default {
               icon: 'success',
               title: 'Category Update successfully'
             });
-          })
-          .catch((e) => {
-
-          })
-    },
-    loadData(page = 1){
-      this.loadActive = true;
-      this.projects = {};
-      let url = 'category?page=' + page;
-      this.tableData.draw++;
-      ApiService.get(url, '', {params: this.tableData})
-          .then(({data}) => {
-            this.loadActive = false;
-            let response = data.data;
-            if (this.tableData.draw == data.draw) {
-              this.projects = response;
-              this.serial_no = response.from;
-            }
-          })
-          .catch(({response}) => {
-
           });
-    },
-    sortBy(key) {
-      if (this.columns_exist.indexOf(key) === -1)
-        return true;
-      this.sortKey = key;
-      this.sortOrders[key] = this.sortOrders[key] * -1;
-      this.tableData.column = this.getIndex(this.columns, 'name', key);
-      this.tableData.dir = this.sortOrders[key] === 1 ? 'asc' : 'desc';
-      this.loadData();
-    },
-    getIndex(array, key, value) {
-      return array.findIndex(i => i[key] == value)
     },
     deleteCategory(id) {
       swal.fire({
@@ -347,25 +286,32 @@ export default {
         confirmButtonText: 'Yes, delete it!'
       }).then((result) => {
         if (result.value) {
-          this.form.delete('brand/' + id)
+          this.form.delete('category/' + id)
               .then((data) => {
-                swal.fire(
-                    'Deleted!',
-                    'Category has been deleted.',
-                    'success'
-                )
-                this.loadData();
+                if (data.data.result === 'Error') {
+                  swal.fire("Failed!", data.data.message, 'warning')
+                } else {
+                  swal.fire(
+                      'Deleted!',
+                      'Category has been deleted.',
+                      'success'
+                  )
+                  this.$store.commit(CATEGORY_REMOVE, id);
+                }
               })
               .catch(() => {
-                swal("Failed!", 'There was something wrong.', 'warning')
+                swal.fire("Failed!", 'There was something wrong.', 'warning')
               });
         }
       })
     },
   },
   created() {
-    this.loadData();
-  }
+    this.$store.dispatch(CATEGORY_LIST)
+  },
+  computed: {
+    ...mapGetters(["categoryList"])
+  },
 }
 </script>
 

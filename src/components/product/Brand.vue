@@ -16,63 +16,40 @@
     <!-- End Page Header -->
 
     <!-- Datatable -->
-    <div id="DataTables_Table_0_wrapper" class="dataTables_wrapper no-footer my-5">
-      <vue-element-loading :active="loadActive" background-color="white" spinner="bar-fade-scale"/>
-      <div class="dataTables_length"><label>Show
-        <select v-model="tableData.length" @change="loadBrand()">
-          <option v-for="(records, index) in perPage" :key="index" :value="records">{{ records }}</option>
-        </select>
-        entries</label></div>
-      <div class="dataTables_filter">
-        <label>Search:
-          <input type="search" v-model="tableData.search" @input="loadBrand()">
-        </label>
-      </div>
-      <datatable :columns="columns" :sortKey="sortKey" :sortOrders="sortOrders" @sort="sortBy">
-        <tbody>
-        <tr role="row" class="odd" v-for="(project, i) in projects.data" :key="project.id">
-          <td>{{ i + serial_no }}</td>
-          <td>{{ project.name }}</td>
-          <td><img :src="getProfilePhoto(project.logo)" v-if="project.logo" class="border" width="80px"></td>
-          <td>{{ project.meta_title }}</td>
-          <td>
-            <CButtonGroup size="sm" class="mx-1">
-              <CButton color="secondary" @click="openModalEdit(project)">
-                <font-awesome-icon icon="edit"/>
-              </CButton>
-              <CButton color="secondary" @click="deleteBrand(project.id)">
-                <font-awesome-icon icon="trash-alt"/>
-              </CButton>
-            </CButtonGroup>
-          </td>
-        </tr>
-        </tbody>
-      </datatable>
-      <div class="dataTables_footer">
-        <div class="dataTables_info">
-          Showing {{ projects.from }} to {{ projects.to }} of {{ projects.total }} entries
+    <div id="people" class="dataTables_wrapper no-footer my-5">
+      <v-client-table :data="this.$store.getters.brandList" :columns="columns" class="text-center" :options="options">
+        <div slot="serial" slot-scope="props">
+          {{ props.index }}
         </div>
-        <div class="dataTables_paginate paging_simple_numbers">
-          <pagination :data="projects" :show-disabled="true" :align="align" :limit="2"
-                      @pagination-change-page="loadBrand">
-            <span slot="prev-nav">Previous</span>
-            <span slot="next-nav">Next</span>
-          </pagination>
+        <div slot="logo" slot-scope="props">
+          <img v-lazy="getProfilePhoto(props.row.logo)" class="border" width="80px">
         </div>
-      </div>
+        <div slot="action" slot-scope="props">
+          <CButtonGroup size="sm" class="mx-1">
+            <CButton color="secondary" @click="openModalEdit(props.row)">
+              <font-awesome-icon icon="edit"/>
+            </CButton>
+            <CButton color="secondary" @click="deleteBrand(props.row.id)">
+              <font-awesome-icon icon="trash-alt"/>
+            </CButton>
+          </CButtonGroup>
+        </div>
+      </v-client-table>
     </div>
     <!-- End Datatable -->
 
     <!-- Modal -->
     <b-modal id="brandModal" :title="editMode ? 'Brand Information Edit': 'New Brand Add'" hide-footer>
       <b-form @submit.prevent="editMode ? updateBrand(): createBrand()" @keydown="form.onKeydown($event)">
-        <b-form-group>
+        <b-form-group label="Brand Name :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               class="form-control form-control-solid h-auto"
               :class="{ 'is-invalid': form.errors.has('name')}"
               id="BrandName-1"
               v-model="$v.form.name.$model"
-              placeholder="Brand Name"
+              placeholder="Enter Brand Name"
               :state="validateState('name')"
               aria-describedby="BrandName"
           ></b-form-input>
@@ -84,25 +61,34 @@
           </b-form-invalid-feedback>
           <has-error :form="form" field="name"></has-error>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Brand logo :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-file
               accept="image/jpeg, image/png, image/jpg"
               placeholder="Choose brand logo 120x80"
-              @change="onInputChange"
+              @change="onInputChange" :state="validateState('logo')"
           ></b-form-file>
+          <b-form-invalid-feedback v-if="!$v.form.logo.required">
+            Brand logo required.
+          </b-form-invalid-feedback>
           <b-form-invalid-feedback id="fileErrorText" :state="validation"></b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Title :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-input
               v-model="$v.form.meta_title.$model"
               :state="validateState('meta_title')"
-              placeholder="Meta Title"
+              placeholder="Enter Meta Title"
           ></b-form-input>
           <b-form-invalid-feedback>
             Meta title maximum 255 character.
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-form-group>
+        <b-form-group label="Meta Description :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
           <b-form-textarea
               id="textarea"
               v-model="form.meta_description"
@@ -113,6 +99,9 @@
         <CRow class="justify-content-end">
           <CCol col="4" sm="4" md="3" class="mb-3 mb-xl-0">
             <CButton block color="info" type="submit" :disabled="form.busy">
+              <span v-if="form.busy" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+              <span v-if="form.busy" class="sr-only">Loading...</span>
               {{ editMode ? 'Update' : 'Submit' }}
             </CButton>
           </CCol>
@@ -127,55 +116,37 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import {validationMixin} from "vuelidate";
 import {required, maxLength} from "vuelidate/lib/validators";
-import ApiService from "@/core/services/api.service";
-import Datatable from "../helper/Datatable";
 import {api_base_url} from "@/core/config/app";
+import {BRAND_ADD, BRAND_LIST, BRAND_MODIFY, BRAND_REMOVE} from "@/core/services/store/module/brand";
 
 export default {
   mixins: [validationMixin],
   name: "Brand",
   data() {
-    let sortOrders = {};
-
-    let columns = [
-      {label: '#', name: '#'},
-      {label: 'Brand Name', name: 'name'},
-      {label: 'Logo', name: 'logo'},
-      {label: 'Mete Title', name: 'meta_title'},
-      {label: 'Action', name: false}
-    ];
-
-    columns.forEach((column) => {
-      sortOrders[column.name] = -1;
-    });
     return {
       validation: true,
       editMode: false,
       form: new Form({
-        id:'',
+        id: '',
         name: '',
         logo: '',
         meta_title: '',
         slug: '',
         meta_description: ''
       }),
-      loadActive: false,
-      projects: {},
-      columns: columns,
-      columns_exist: ['name', 'slug', 'meta_title'],
-      sortKey: 'deadline',
-      sortOrders: sortOrders,
-      perPage: ['10', '20', '50'],
-      align: 'right',
-      tableData: {
-        draw: 0,
-        length: 10,
-        search: '',
-        column: 0,
-        dir: 'desc',
-      },
+      columns: ['serial', 'name', 'logo', 'meta_title', 'action'],
+      options: {
+        headings: {
+          serial: '#',
+          name: 'Brand Name',
+          logo: 'Brand Logo'
+        },
+        sortable: ['name'],
+        filterable: ['name', 'meta_title']
+      }
     }
   },
   validations: {
@@ -186,11 +157,11 @@ export default {
       },
       meta_title: {
         maxLength: maxLength(255)
+      },
+      logo: {
+        required
       }
     }
-  },
-  components: {
-    datatable: Datatable
   },
   methods: {
     getProfilePhoto(e) {
@@ -199,36 +170,6 @@ export default {
     validateState(name) {
       const {$dirty, $error} = this.$v.form[name];
       return $dirty ? !$error : null;
-    },
-    loadBrand(page = 1) {
-      this.loadActive = true;
-      this.projects = {};
-      let url = 'brand?page=' + page;
-      this.tableData.draw++;
-      ApiService.get(url, '', {params: this.tableData})
-          .then(({data}) => {
-            this.loadActive = false;
-            let response = data.data;
-            if (this.tableData.draw == data.draw) {
-              this.projects = response;
-              this.serial_no = response.from;
-            }
-          })
-          .catch(({response}) => {
-
-          });
-    },
-    sortBy(key) {
-      if (this.columns_exist.indexOf(key) === -1)
-        return true;
-      this.sortKey = key;
-      this.sortOrders[key] = this.sortOrders[key] * -1;
-      this.tableData.column = this.getIndex(this.columns, 'name', key);
-      this.tableData.dir = this.sortOrders[key] === 1 ? 'asc' : 'desc';
-      this.loadBrand();
-    },
-    getIndex(array, key, value) {
-      return array.findIndex(i => i[key] == value)
     },
     openModal() {
       this.validation = true;
@@ -249,7 +190,6 @@ export default {
     },
     onInputChange(e) {
       const files = e.target.files[0];
-
       if (!files.type.match('image.*')) {
         $('#fileErrorText').text(files.name + ' is not a image');
         this.validation = false;
@@ -273,28 +213,24 @@ export default {
         return;
       }
       this.form.post('brand')
-          .then((e) => {
-            this.loadBrand();
+          .then(({data}) => {
+            this.$store.commit(BRAND_ADD, data);
             this.form.reset();
-            this.validation = true;
             this.$bvModal.hide('brandModal');
             toast.fire({
               icon: 'success',
               title: 'Brand Add successfully'
             });
           })
-          .catch((e) => {
-
-          })
     },
-    updateBrand(){
+    updateBrand() {
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         return;
       }
-      this.form.put('brand/'+ this.form.id)
-          .then((e) => {
-            this.loadBrand();
+      this.form.put('brand/' + this.form.id)
+          .then(({data}) => {
+            this.$store.commit(BRAND_MODIFY, data);
             this.form.reset();
             this.validation = true;
             this.$bvModal.hide('brandModal');
@@ -303,11 +239,9 @@ export default {
               title: 'Brand Update successfully'
             });
           })
-          .catch((e) => {
-
-          })
     },
     deleteBrand(id) {
+      let that = this;
       swal.fire({
         title: 'Are you sure?',
         text: "You won't be able to revert this!",
@@ -320,23 +254,31 @@ export default {
         if (result.value) {
           this.form.delete('brand/' + id)
               .then((data) => {
-                swal.fire(
-                    'Deleted!',
-                    'Brand has been deleted.',
-                    'success'
-                )
-                this.loadBrand();
+                if (data.data.result === 'Error') {
+                  swal.fire("Failed!", data.data.message, 'warning')
+                } else {
+                  swal.fire(
+                      'Deleted!',
+                      'Brand has been deleted.',
+                      'success'
+                  )
+                  this.$store.commit(BRAND_REMOVE, id);
+                }
+
               })
               .catch(() => {
-                swal("Failed!", 'There was something wrong.', 'warning')
+                swal.fire("Failed!", 'There was something wrong.', 'warning')
               });
         }
       })
     },
   },
   created() {
-    this.loadBrand();
-  }
+    this.$store.dispatch(BRAND_LIST)
+  },
+  computed: {
+    ...mapGetters(["brandList"])
+  },
 }
 </script>
 

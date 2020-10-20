@@ -225,19 +225,87 @@
 }
 
 .colorImage {
-  .image-container{
-    width: 100px!important;
-    height: 100px!important;
-    .preview-image{
-      height: 69px!important;
+  .image-container {
+    width: 100px !important;
+    height: 100px !important;
+
+    .preview-image {
+      height: 69px !important;
     }
-    .image-bottom{
-      height: 20px!important;
+
+    .image-bottom {
+      height: 20px !important;
     }
   }
 
-  .show-image img{
-    max-height: 70px!important;
-    max-width: 68px!important;
+  .show-image img {
+    max-height: 70px !important;
+    max-width: 68px !important;
   }
 }
+
+//Vue data table css code
+.VueTables__search-field {
+  margin: 10px 0 0 10px;
+
+  label {
+    display: none;
+  }
+}
+
+.VueTables__limit-field {
+  margin: 10px 10px 0 0;
+
+  label {
+    display: none;
+  }
+}
+
+.dataTables_wrapper table.VueTables__table {
+  thead {
+    tr:last-child th {
+      padding-right: 1.7rem;
+    }
+
+    th {
+      &.sorting, &.sorting_asc, &.sorting_desc {
+        position: relative;
+      }
+
+      &:first-child {
+        border-left: none;
+      }
+
+      text-align: center;
+      background-color: #fbfbfb;
+      border: 1px solid #e1e5eb;
+      font-weight: 400;
+      padding: 0.75rem 1.0625rem;
+    }
+  }
+
+  td:focus, th:focus {
+    outline: 0 !important;
+  }
+}
+
+.VuePagination__pagination {
+  li a.active {
+    background-color: #0771de;
+    color: white;
+  }
+}
+
+//Property menu select style
+.custom-select:focus {
+  outline: 0;
+  border: 0;
+  box-shadow: 0 0 0 0;
+}
+
+.cat-select-design {
+  border: 1px solid #9199a7 !important;
+  font-size: 13px;
+}
+
+
