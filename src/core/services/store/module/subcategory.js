@@ -31,6 +31,17 @@ const getters = {
     getSubcategoryById: state => id => state.subcategory.filter(value => value.category_id === id),
 
     getSubcategoryNameById: state => id => state.subcategory.find(value => value.id === id),
+
+    getSubListingId: state => id => {
+        let alldata = state.subcategory.filter(value => value.category_id === id && value.serial !== null);
+
+        let data = [];
+        for (let i = 0; i < alldata.length; i++) {
+            data.push(alldata[i].id);
+        }
+        return data;
+    }
+
 };
 
 const mutations = {

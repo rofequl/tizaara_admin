@@ -16,60 +16,65 @@
     </div>
     <!-- End Page Header -->
 
-
+    <!-- Datatable -->
+    <div id="people" class="dataTables_wrapper no-footer my-5">
+      <v-client-table :data="Object.values(propertyList)" :columns="columns" class="text-center" :options="options">
+        <div slot="serial" slot-scope="props">
+          {{ props.index }}
+        </div>
+        <div slot="name" slot-scope="props" v-html="getPropertyList(props.row.name)"></div>
+        <div slot="category" slot-scope="props">
+          {{ getLastCatChild(props.row.position, props.row.cat_id) }}
+        </div>
+        <div slot="action" slot-scope="props">
+          <CButton color="secondary" @click="deleteProperties(props.row.id)">
+            <font-awesome-icon icon="trash-alt"/>
+          </CButton>
+        </div>
+      </v-client-table>
+    </div>
+    <!-- End Datatable -->
 
 
   </div>
 </template>
 
 <script>
-import {validationMixin} from "vuelidate";
-
-
+import {mapGetters} from "vuex";
+import {PROPERTY_LIST, PROPERTY_REMOVE} from "@/core/services/store/module/property";
+import {CATEGORY_LIST} from "@/core/services/store/module/category";
+import {SUBCATEGORY_LIST} from "@/core/services/store/module/subcategory";
+import {SUBSUBCATEGORY_LIST} from "@/core/services/store/module/subsubcategory";
+import ApiService from "@/core/services/api.service";
 
 export default {
-  mixins: [validationMixin],
   name: "Property",
   data() {
-    return {}
+    return {
+      columns: ['serial', 'name', 'category', 'action'],
+      options: {
+        headings: {
+          serial: '#',
+          name: 'Property List',
+          category: 'Child Category'
+        }
+      }
+    }
   },
   methods: {
-    createProperties() {
-      this.$v.form.$touch();
-      if (this.$v.form.$anyError) {
-        return;
+    getPropertyList(e) {
+      let data = '';
+      let property = JSON.parse(e);
+      for (let i = 0; i < property.length; i++) {
+        data += property[i].name + '<br>';
       }
-      this.form.post('property')
-          .then((e) => {
-            this.addProperties();
-            this.loadData();
-            toast.fire({
-              icon: 'success',
-              title: 'Property Add successfully'
-            });
-          })
-          .catch((e) => {
-
-          })
+      return data;
     },
-    updateProperties() {
-      this.$v.form.$touch();
-      if (this.$v.form.$anyError) {
-        return;
-      }
-      this.form.put('property/' + this.form.id)
-          .then((e) => {
-            this.addProperties();
-            this.loadData();
-            toast.fire({
-              icon: 'success',
-              title: 'Property Update successfully'
-            });
-          })
-          .catch((e) => {
 
-          })
+    getLastCatChild(position, id) {
+      return position === 1 ? this.getCategoryById(id).name : position === 2 ? this.getSubcategoryNameById(id).name : this.getSubsubcategoryNameById(id).name;
     },
+
     deleteProperties(id) {
       swal.fire({
         title: 'Are you sure?',
@@ -81,13 +86,13 @@ export default {
         confirmButtonText: 'Yes, delete it!'
       }).then((result) => {
         if (result.value) {
-          this.form.delete('attribute/' + id)
+          ApiService.delete('property/' + id)
               .then((data) => {
-                this.loadData();
                 toast.fire({
                   icon: 'success',
                   title: 'Property deleted successfully'
                 });
+                this.$store.commit(PROPERTY_REMOVE, id);
               })
               .catch(() => {
                 swal("Failed!", 'There was something wrong.', 'warning')
@@ -97,10 +102,13 @@ export default {
     },
   },
   created() {
-
+    this.$store.dispatch(CATEGORY_LIST)
+    this.$store.dispatch(SUBCATEGORY_LIST)
+    this.$store.dispatch(SUBSUBCATEGORY_LIST)
+    this.$store.dispatch(PROPERTY_LIST)
   },
   computed: {
-
+    ...mapGetters(["propertyList", "getCategoryById", "getSubcategoryNameById", "getSubsubcategoryNameById"])
   },
 }
 </script>

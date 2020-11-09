@@ -11,7 +11,7 @@
         <div class="mx-auto ml-sm-auto mr-sm-0">
           <router-link class="btn btn-primary" to="/product/product-admin-create" color="info">
             <font-awesome-icon icon="plus" class="mr-2"/>
-            Add New Product
+            Add New Product / Service
           </router-link>
         </div>
       </div>
@@ -48,12 +48,16 @@
           <td>{{ project.priceType == 1 ? totalPrice(project.product_stock) : project.unit_price }}</td>
           <td>
             <CButtonGroup size="sm" class="mx-1">
-              <CButton color="secondary">
-                <font-awesome-icon icon="edit"/>
-              </CButton>
-              <CButton color="secondary">
-                <font-awesome-icon icon="trash-alt"/>
-              </CButton>
+              <router-link :to="'/product/product-edit/'+project.slug">
+                <CButton color="secondary">
+                  <font-awesome-icon icon="edit"/>
+                </CButton>
+              </router-link>
+              <a href="#" @click.prevent="deleteProduct(project.id)">
+                <CButton color="secondary">
+                  <font-awesome-icon icon="trash-alt"/>
+                </CButton>
+              </a>
             </CButtonGroup>
           </td>
         </tr>
@@ -168,7 +172,7 @@ export default {
           return total + num
         }, 0);
       } else {
-        return e.quantity > 0? e.quantity: 0;
+        return e.quantity > 0 ? e.quantity : 0;
       }
     },
     totalPrice: function (e) {
@@ -179,7 +183,38 @@ export default {
       let min = e.reduce((a, b) => Number(a.price) < Number(b.price) ? a : b)
       return max === min ? max.price : min.price + ' - ' + max.price;
 
-    }
+    },
+    deleteProduct(id) {
+      swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.value) {
+          ApiService.delete('product/' + id)
+              .then((data) => {
+                if (data.data.result === 'Error') {
+                  swal.fire("Failed!", data.data.message, 'warning')
+                } else {
+                  swal.fire(
+                      'Deleted!',
+                      'Product has been deleted.',
+                      'success'
+                  )
+                  let index = this.projects.data.findIndex(value => value.id === id)
+                  this.projects.data.splice(index, 1);
+                }
+              })
+              .catch(() => {
+                swal.fire("Failed!", 'There was something wrong.', 'warning')
+              });
+        }
+      })
+    },
   },
   created() {
     this.loadData();

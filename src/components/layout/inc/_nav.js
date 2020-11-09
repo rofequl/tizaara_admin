@@ -10,7 +10,7 @@ export default [
             },
             {
                 _name: 'CSidebarNavDropdown',
-                name: 'Product',
+                name: 'Product / Service',
                 route: '/product',
                 icon: 'cil-cart',
                 items: [
@@ -87,6 +87,10 @@ export default [
                 route: '/frontend',
                 icon: 'cil-screen-desktop',
                 items: [
+                    {
+                        name: 'Home',
+                        to: '/frontend/home'
+                    },
                     {
                         name: 'General Settings',
                         to: '/frontend/general-settings'

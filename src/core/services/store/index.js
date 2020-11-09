@@ -7,6 +7,12 @@ import brand from './module/brand';
 import category from './module/category';
 import subcategory from './module/subcategory';
 import subsubcategory from './module/subsubcategory';
+import property from './module/property';
+import unit from './module/unit';
+import color from './module/color';
+import attribute from './module/attribute';
+import currency from './module/currency';
+import homeslider from "@/core/services/store/module/homeslider";
 
 Vue.use(Vuex)
 
@@ -52,5 +58,11 @@ export default new Vuex.Store({
         category,
         subcategory,
         subsubcategory,
+        property,
+        unit,
+        color,
+        attribute,
+        currency,
+        homeslider,
     }
 })

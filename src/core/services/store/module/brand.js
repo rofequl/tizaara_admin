@@ -14,7 +14,7 @@ export const BRAND_SET_LOADING = "brandSetLoading";
 const state = {
     errors: null,
     loading: false,
-    brands: {},
+    brands: [],
 };
 
 const getters = {
@@ -26,6 +26,18 @@ const getters = {
     },
     brandIsLoaded(state) {
         return !state.loading;
+    },
+
+    getBrandById: state => id => state.brands.find(value => value.id === id),
+
+    getBrandListingId(state) {
+        let data = [];
+        for (let i = 0; i < state.brands.length; i++) {
+            if (state.brands[i].serial != null) {
+                data.push(state.brands[i].id);
+            }
+        }
+        return data;
     }
 };
 

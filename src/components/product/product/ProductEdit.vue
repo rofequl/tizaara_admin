@@ -2,10 +2,10 @@
   <div>
     <CCard class="">
       <CCardBody>
-        <form-wizard @on-complete="formSubmit" title="Add New Products / Service" subtitle="Insert product/Service information"
+        <form-wizard @on-complete="formSubmit" title="Add New Products" subtitle="Insert product information"
                      color="#3c4b64">
           <!-- Part - 1 -->
-          <tab-content title="Product/Service Information" icon="ti-package"
+          <tab-content title="Product Information" icon="ti-package"
                        :before-change="validateFirstStep">
             <div class="card" style="background-color: #dae2ed;">
               <div class="card-body" style="padding: 12px">
@@ -37,11 +37,11 @@
               </div>
             </div>
 
-            <CInput label="Product/Service Name* :" v-model="$v.form.name.$model"
+            <CInput label="Product Name* :" v-model="$v.form.name.$model"
                     horizontal placeholder="Enter product name"
                     :invalidFeedback="!$v.form.name.required?'Product name required.': $v.form.name.maxLength?'':'Product name not more than 200 character.' "
                     :isValid="validateState('name')"/>
-            <CTextarea label="Product/Service sort description : " v-model="$v.form.sort_desc.$model"
+            <CTextarea label="Product sort description : " v-model="$v.form.sort_desc.$model"
                        horizontal placeholder="Product sort description"
                        :invalidFeedback="$v.form.sort_desc.maxLength?'':'Product sort description not more than 500 character.'"
                        :isValid="validateState('sort_desc')"
@@ -89,7 +89,7 @@
           </tab-content>
           <!-- End Part - 1 -->
           <!-- Part - 2 -->
-          <tab-content title="Product/Service Images" icon="ti-image"
+          <tab-content title="Product Images" icon="ti-image"
                        :before-change="validateSecondStep">
             <b-alert
                 variant="danger"
@@ -102,7 +102,7 @@
             <CRow class="my-3">
               <CCol md="6">
                 <div role="group" class="d-flex justify-content-center">
-                  <div class=""><label>Select Product/Service Images* :</label>
+                  <div class=""><label>Select Product Images* :</label>
                     <vue-upload-multiple-image
                         @before-remove="(index, done, fileList) =>{ done(); form.photos = fileList}"
                         @upload-success="(formData, index, fileList) =>{ form.photos = fileList}"
@@ -170,7 +170,7 @@
             <CRow class="my-4">
               <CCol md="6">
                 <CInput
-                    type="url" label="Product/Service Videos Url:" v-model="form.video_link" max="100"
+                    type="url" label="Product Videos Url:" v-model="form.video_link" max="100"
                     placeholder="Youtube / Vimeo / DailyMotion">
                   <template #append>
                     <CButton type="button" color="primary" @click="productVideo">
@@ -188,8 +188,8 @@
           </tab-content>
           <!-- End Part - 2 -->
           <!-- Part - 3 -->
-          <tab-content title="Product/Service Price" icon="ti-money" :before-change="validateThirdStep">
-            Product/Service Attribute
+          <tab-content title="Product Price" icon="ti-money" :before-change="validateThirdStep">
+            Product Attribute
             <hr>
             <c-row>
               <CCol col="6" sm="4" md="2" class="mb-3 mb-xl-0">
@@ -200,7 +200,7 @@
               <CCol col="6" sm="4" md="6" class="mb-3 mb-xl-0">
                 <v-select v-model="form.color" :options="Object.values(colorList)" label="name"
                           @input="selectColour"
-                          placeholder="Select product/Service colour"
+                          placeholder="Select product colour"
                           :reduce="name => name.name" multiple>
                   <template #option="{ name, code }">
                     <div class="d-inline-block">
@@ -255,7 +255,7 @@
               <CCol col="6" sm="4" md="6" class="mb-3 mb-xl-0">
                 <v-select v-model="form.attribute" :options="Object.values(attributeList)" label="name"
                           @input="selectAttribute"
-                          :reduce="name => name.name" placeholder="Select product/Service Attribute" multiple>
+                          :reduce="name => name.name" placeholder="Select product Attribute" multiple>
                 </v-select>
               </CCol>
             </CRow>
@@ -273,7 +273,7 @@
                     @tags-changed="(newTags) => {addAttributes.value = newTags; priceList()}"/>
               </CCol>
             </CRow>
-            <br><br><br>Product/Service Tax, Offer & Discount
+            <br><br><br>Product Tax, Offer & Discount
             <hr>
             <CRow>
               <CCol col="12" md="7" class="mb-3 mb-xl-0">
@@ -423,7 +423,7 @@
             </CRow>
 
 
-            <br><br><br>Product/Service price and stock
+            <br><br><br>Product price and stock
             <hr>
             <CRow class="mt-4">
               <CCol col="12">
@@ -559,8 +559,8 @@
           </tab-content>
           <!-- End Part - 3 -->
           <!-- Part - 4 -->
-          <tab-content title="Product/Service Description" :before-change="validateForthStep" icon="ti-receipt">
-            Product/Service Description
+          <tab-content title="Product Description" :before-change="validateForthStep" icon="ti-receipt">
+            Product Description
             <hr>
             <CInput label="Product Weight :" v-model="$v.form.weight.$model"
                     horizontal placeholder="Enter product weight"
@@ -617,7 +617,7 @@
           </tab-content>
           <!-- End Part - 4 -->
           <!-- Part - 5 -->
-          <tab-content title="Product/Service Shipping and SEO" icon="ti-truck">
+          <tab-content title="Product Shipping and SEO" icon="ti-truck">
             Product Shipping Cost
             <hr>
             <CRow>
@@ -708,12 +708,13 @@ import {PROPERTY_LIST} from "@/core/services/store/module/property";
 
 export default {
   mixins: [validationMixin],
-  name: "ProductCreate",
+  name: "ProductEdit",
   data() {
     return {
       cat_valid: false,
       cat_method: 1,
       form: new Form({
+        id: '',
         added_by: 'admin',
         name: '',
         sort_desc: '',
@@ -1086,18 +1087,18 @@ export default {
 
       this.show = true;
       this.form.category_label = this.cat_method;
-      this.form.post('product')
+      this.form.put('product/' + this.form.id)
           .then((e) => {
             this.show = false;
             swal.fire({
-              title: 'Product upload successfully',
-              text: "Product upload successfully",
+              title: 'Product update successfully',
+              text: "Product update successfully",
               icon: 'success',
               showCancelButton: false,
               confirmButtonColor: '#3085d6',
               confirmButtonText: 'Ok'
             }).then((result) => {
-              this.$router.push({name: "In House Products"});
+              //this.$router.push({name: "In House Products"});
             })
           })
           .catch((error) => {
@@ -1128,14 +1129,192 @@ export default {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'Ok'
               }).then((result) => {
-                this.$router.push({name: "In House Products"});
+                //this.$router.push({name: "In House Products"});
               })
             }
+          })
+    },
+    loadProduct() {
+      let url = 'product/' + this.$route.params.id;
+      this.form.get(url)
+          .then(({data}) => {
+            let that = this;
+            this.form.id = data.id;
+            this.form.name = data.name;
+            this.form.sort_desc = data.sort_desc;
+            this.form.category_id = data.category_id;
+            setTimeout(function () {
+              that.form.sub_category_id = data.subcategory_id;
+              setTimeout(function () {
+                that.form.sub_subcategory_id = data.subsubcategory_id;
+                setTimeout(function () {
+                  that.form.properties = JSON.parse(data.property_options);
+                }, 1000);
+              }, 2000);
+            }, 2000);
+            this.form.sub_category_id = data.subcategory_id;
+            this.form.category_label = data.category_label;
+            this.cat_method = data.category_label;
+            this.form.brand_id = data.brand_id;
+            this.form.unit = data.unit.id;
+            this.form.weight = data.weight;
+            this.form.length = data.length;
+            this.form.width = data.width;
+            this.form.height = data.height;
+            this.form.product_type = data.product_type;
+            let photos = JSON.parse(data.photos);
+            for (let i = 0; i < photos.length; i++) {
+              this.images.push({
+                path: this.showImage(photos[i]),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+              this.form.photos.push({
+                path: this.showImage(photos[i]),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+            }
+            if (data.thumbnail_img !== '') {
+              this.thumbnail.push({
+                path: this.showImage(data.thumbnail_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+              this.form.thumbnail_img.push({
+                path: this.showImage(data.thumbnail_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+            }
+            if (data.featured_img !== '') {
+              this.featured.push({
+                path: this.showImage(data.featured_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+              this.form.featured_img.push({
+                path: this.showImage(data.featured_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+            }
+            if (data.flash_deal_img !== '') {
+              this.flash_deal.push({
+                path: this.showImage(data.flash_deal_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+              this.form.flash_deal_img.push({
+                path: this.showImage(data.flash_deal_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+            }
+            if (data.meta_img !== '') {
+              this.meta_img.push({
+                path: this.showImage(data.meta_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+              this.form.meta_img.push({
+                path: this.showImage(data.meta_img),
+                default: 1,
+                highlight: 1,
+                caption: 'caption to display. receive',
+              });
+            }
+            this.form.video_link = data.video_link;
+            this.form.color = JSON.parse(data.colors);
+            this.form.color_type = data.color_type;
+            this.color_type = data.color_type;
+            let color = JSON.parse(data.color_image);
+            for (let prop in color) {
+              this.form.color_image.push({
+                name: color[prop].name,
+                image: [{
+                  path: this.showImage(color[prop].image),
+                  default: 1,
+                  highlight: 1,
+                  caption: 'caption to display. receive',
+                }],
+                imageAlfa: [{
+                  path: this.showImage(color[prop].image),
+                  default: 1,
+                  highlight: 1,
+                  caption: 'caption to display. receive',
+                }],
+              })
+            }
+            this.form.attribute = JSON.parse(data.attributes);
+            let attribute = JSON.parse(data.attribute_options);
+            for (let prop in attribute) {
+              let value = [];
+              for (let prap in attribute[prop].value) {
+                value.push({
+                  "text": attribute[prop].value[prap].text,
+                  "tiClasses": ["ti-valid"]
+                })
+              }
+              this.form.attribute_options.push({
+                name: attribute[prop].name,
+                tag: '',
+                value: value
+              })
+            }
+            if (data.description !== null) {
+              this.form.description = data.description;
+            }
+            if (data.tags != null && data.tags != "null"){
+              let tags = JSON.parse(data.tags).split(",");
+              for (let prap in tags) {
+
+                this.tags.push({
+                  "text": tags[prap],
+                  "tiClasses": ["ti-valid"]
+                })
+              }
+            }
+            this.form.orderQtyLimit = data.orderQtyLimit;
+            this.orderQtyLimit = data.orderQtyLimit == 1;
+            this.form.orderQtyLimitMax = data.orderQtyLimitMax;
+            this.form.orderQtyLimitMin = data.orderQtyLimitMin;
+            this.form.currency_id = data.currency_id;
+            this.form.tax = data.tax;
+            this.form.tax_type = data.tax_type;
+            this.form.discount = data.discount;
+            this.form.discount_type = data.discount_type;
+            this.form.discountMethod = data.discount_variation;
+            let tierDiscount = [];
+            for (let prop in data.discount_variation_data) {
+              tierDiscount.push({
+                unit: data.discount_variation_data[prop].min_qty,
+                value: data.discount_variation_data[prop].percent_off,
+              })
+            }
+            this.form.tierDiscount = tierDiscount;
+            this.form.priceType = data.priceType;
+            this.form.stockManagement = data.stockManagement;
+            this.form.unit_price = data.unit_price;
+            this.form.quantity = data.quantity;
+            this.form.sku = data.sku;
+            this.form.shipping_type = data.shipping_type;
+            this.form.shipping_cost = data.shipping_cost;
+            this.form.meta_title = data.meta_title;
+            this.form.meta_description = data.meta_description;
           })
     }
   },
   created() {
-    this.form.sku = btoa(Date.now() + Math.floor(Math.random() * 999)).replace(/[^a-zA-Z ]/g, "").toUpperCase();
     this.$store.dispatch(SUBSUBCATEGORY_LIST)
     this.$store.dispatch(SUBCATEGORY_LIST)
     this.$store.dispatch(CATEGORY_LIST)
@@ -1145,6 +1324,7 @@ export default {
     this.$store.dispatch(ATTRIBUTE_LIST)
     this.$store.dispatch(CURRENCY_LIST)
     this.$store.dispatch(PROPERTY_LIST)
+    this.loadProduct();
   },
   watch: {
     cat_valid: function () {

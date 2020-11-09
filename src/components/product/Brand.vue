@@ -17,7 +17,7 @@
 
     <!-- Datatable -->
     <div id="people" class="dataTables_wrapper no-footer my-5">
-      <v-client-table :data="this.$store.getters.brandList" :columns="columns" class="text-center" :options="options">
+      <v-client-table :data="Object.values(brandList)" :columns="columns" class="text-center" :options="options">
         <div slot="serial" slot-scope="props">
           {{ props.index }}
         </div>

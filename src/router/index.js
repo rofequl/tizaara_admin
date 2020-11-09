@@ -73,6 +73,12 @@ export default new Router({
                     component: () => import("@/components/product/product/ProductCreate")
                 },
                 {
+                    meta: {title: 'Product Edit'},
+                    path: "/product/product-edit/:id",
+                    name: "Product Edit",
+                    component: () => import("@/components/product/product/ProductEdit")
+                },
+                {
                     meta: {title: 'Products Group'},
                     path: "/product/product-group",
                     name: "Products Group",
@@ -138,6 +144,12 @@ export default new Router({
             path: "/frontend",
             component: () => import("@/components/layout/Layout"),
             children: [
+                {
+                    meta: {title: 'Home Settings '},
+                    path: "/frontend/home",
+                    name: "Home Settings",
+                    component: () => import("@/components/frontend/Home")
+                },
                 {
                     meta: {title: 'General Settings '},
                     path: "/frontend/general-settings",

@@ -21,7 +21,9 @@
         <div slot="serial" slot-scope="props">
           {{ props.index }}
         </div>
-
+        <div slot="banner" slot-scope="props">
+          <img v-lazy="getProfilePhoto(props.row.banner)" class="border" width="90px">
+        </div>
         <div slot="action" slot-scope="props">
           <CButtonGroup size="sm" class="mx-1">
             <CButton color="secondary" @click="openModalEdit(props.row)">
@@ -72,6 +74,19 @@
           <b-form-invalid-feedback v-if="!$v.form.category_id.required">
             Category required.
           </b-form-invalid-feedback>
+        </b-form-group>
+        <b-form-group label="Subcategory banner :"
+                      label-cols-sm="5"
+                      label-cols-lg="4">
+          <b-form-file
+              accept="image/jpeg, image/png, image/jpg"
+              placeholder="Choose subcategory banner 300x300"
+              @change="onInputChange" :state="validateState('banner')"
+          ></b-form-file>
+          <b-form-invalid-feedback v-if="!$v.form.banner.required">
+            Subcategory banner required.
+          </b-form-invalid-feedback>
+          <b-form-invalid-feedback id="fileErrorText" :state="validation"></b-form-invalid-feedback>
         </b-form-group>
         <b-form-group label="Meta Title :"
                       label-cols-sm="5"
@@ -139,11 +154,12 @@ export default {
         id: '',
         name: '',
         category_id: '',
+        banner: '',
         meta_title: '',
         slug: '',
         meta_description: ''
       }),
-      columns: ['serial', 'name', 'categoryName', 'action'],
+      columns: ['serial', 'name', 'categoryName', 'banner', 'action'],
       options: {
         headings: {
           serial: '#',
@@ -166,6 +182,9 @@ export default {
       },
       category_id: {
         required
+      },
+      banner: {
+        required,
       }
     }
   },
@@ -176,6 +195,25 @@ export default {
     validateState(name) {
       const {$dirty, $error} = this.$v.form[name];
       return $dirty ? !$error : null;
+    },
+    onInputChange(e) {
+      const files = e.target.files[0];
+      if (!files.type.match('image.*')) {
+        $('#fileErrorText').text(files.name + ' is not a image');
+        this.validation = false;
+        return;
+      }
+      if (files['size'] > 2111775) {
+        $('#fileErrorText').text('You are uploading a large file.');
+        this.validation = false;
+        return;
+      }
+      this.validation = true;
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        this.form.banner = reader.result
+      }
+      reader.readAsDataURL(files);
     },
     openModal() {
       $('.modal-content').removeAttr('tabindex');

@@ -62,7 +62,7 @@
                 <td>
                   <b-form-input placeholder="Enter property label name"
                                 type="text" :disabled="!cat_valid"
-                                v-model="volume.name"
+                                v-model="volume.name" required
                   ></b-form-input>
                 </td>
                 <td>
@@ -116,21 +116,27 @@ export default {
   },
   methods: {
     categorySelect: function (e) {
-      this.form.sub_category_id = '';
-      this.form.sub_subcategory_id = '';
-      this.subcategory = [];
-      this.subsubcategory = [];
-      this.subcategory = this.getSubcategoryById(e);
-      this.cat_valid = !this.subcategory.length > 0
+      if (e !== '' && e !== undefined) {
+        this.form.sub_category_id = '';
+        this.form.sub_subcategory_id = '';
+        this.subcategory = [];
+        this.subsubcategory = [];
+        this.subcategory = this.getSubcategoryById(e);
+        this.cat_valid = !this.subcategory.length > 0
+      }
     },
     subcategorySelect(e) {
-      this.form.sub_subcategory_id = '';
-      this.subsubcategory = [];
-      this.subsubcategory = this.getSubsubcategoryById(e);
-      this.cat_valid = !this.subsubcategory.length > 0
+      if (e !== '' && e !== undefined) {
+        this.form.sub_subcategory_id = '';
+        this.subsubcategory = [];
+        this.subsubcategory = this.getSubsubcategoryById(e);
+        this.cat_valid = !this.subsubcategory.length > 0
+      }
     },
     subsubcategorySelect(e) {
-      this.cat_valid = e !== ''
+      if (e !== '' && e !== undefined) {
+        this.cat_valid = e !== ''
+      }
     },
     catNameShow(id, type) {
       if (type === 'category' && id !== '') {
@@ -162,10 +168,16 @@ export default {
     createProperties() {
       this.form.post('property')
           .then((e) => {
-            toast.fire({
+            swal.fire({
+              title: 'Success',
+              text: "Property create successfully",
               icon: 'success',
-              title: 'Property Add successfully'
-            });
+              showCancelButton: false,
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'Ok'
+            }).then((result) => {
+              this.$router.push({name: "Properties"});
+            })
           })
     },
   },
