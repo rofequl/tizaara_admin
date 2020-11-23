@@ -129,6 +129,18 @@ export default new Router({
             ]
         },
         {
+            path: "/marketing",
+            component: () => import("@/components/layout/Layout"),
+            children: [
+                {
+                    meta: {title: 'Quotation List'},
+                    path: "/marketing/quotation",
+                    name: "Quotation List",
+                    component: () => import("@/components/marketing/Quotation")
+                }
+            ]
+        },
+        {
             path: "/user",
             component: () => import("@/components/layout/Layout"),
             children: [

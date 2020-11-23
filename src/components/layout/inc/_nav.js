@@ -71,6 +71,26 @@ export default [
             },
             {
                 _name: 'CSidebarNavDropdown',
+                name: 'Marketing',
+                route: '/marketing',
+                icon: 'cil-bullhorn',
+                items: [
+                    {
+                        name: 'Quotation',
+                        to: '/marketing/quotation'
+                    },
+                    {
+                        name: 'Subscribers',
+                        to: '/marketing/subscribers'
+                    },
+                    {
+                        name: 'Coupon',
+                        to: '/marketing/coupon'
+                    }
+                ]
+            },
+            {
+                _name: 'CSidebarNavDropdown',
                 name: 'User',
                 route: '/user',
                 icon: 'cil-user-plus',

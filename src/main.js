@@ -122,6 +122,19 @@ import {ClientTable} from 'vue-tables-2';
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', {});
 
+/*============================================
+// npm install vue-data-tables
+============================================= */
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
+import lang from 'element-ui/lib/locale/lang/en'
+import locale from 'element-ui/lib/locale'
+locale.use(lang)
+import VueDataTables from 'vue-data-tables'
+Vue.use(VueDataTables)
+
+
 router.beforeEach((to, from, next) => {
     Promise.all([store.dispatch(VERIFY_AUTH)]).then(next);
     setTimeout(() => {

@@ -82,7 +82,8 @@ import {
     cilCart,
     cilMap,
     cilScreenDesktop,
-    cilUserPlus
+    cilUserPlus,
+    cilBullhorn
 } from '@coreui/icons'
 import {logo} from './logo'
 
@@ -140,7 +141,8 @@ export const iconsSet = Object.assign(
         cilHome,
         cilMap,
         cilScreenDesktop,
-        cilUserPlus
+        cilUserPlus,
+        cilBullhorn
     },
     {
         cifUs,

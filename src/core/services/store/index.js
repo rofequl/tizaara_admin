@@ -13,6 +13,7 @@ import color from './module/color';
 import attribute from './module/attribute';
 import currency from './module/currency';
 import homeslider from "@/core/services/store/module/homeslider";
+import quotation from "@/core/services/store/module/quotation";
 
 Vue.use(Vuex)
 
@@ -64,5 +65,6 @@ export default new Vuex.Store({
         attribute,
         currency,
         homeslider,
+        quotation,
     }
 })
