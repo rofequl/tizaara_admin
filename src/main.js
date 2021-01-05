@@ -127,13 +127,27 @@ Vue.use(ClientTable, {}, false, 'bootstrap4', {});
 ============================================= */
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+
 Vue.use(ElementUI)
 import lang from 'element-ui/lib/locale/lang/en'
 import locale from 'element-ui/lib/locale'
+
 locale.use(lang)
 import VueDataTables from 'vue-data-tables'
+
 Vue.use(VueDataTables)
 
+/*============================================
+// npm install vue-moment
+============================================= */
+Vue.use(require('vue-moment'));
+
+/*============================================
+// npm install vue2-editor
+============================================= */
+import Vue2Editor from "vue2-editor";
+
+Vue.use(Vue2Editor);
 
 router.beforeEach((to, from, next) => {
     Promise.all([store.dispatch(VERIFY_AUTH)]).then(next);

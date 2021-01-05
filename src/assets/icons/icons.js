@@ -83,7 +83,8 @@ import {
     cilMap,
     cilScreenDesktop,
     cilUserPlus,
-    cilBullhorn
+    cilBullhorn,
+    cilHamburgerMenu
 } from '@coreui/icons'
 import {logo} from './logo'
 
@@ -142,7 +143,8 @@ export const iconsSet = Object.assign(
         cilMap,
         cilScreenDesktop,
         cilUserPlus,
-        cilBullhorn
+        cilBullhorn,
+        cilHamburgerMenu
     },
     {
         cifUs,
@@ -190,7 +192,8 @@ import {
     faSearch,
     faMailBulk,
     faPhone,
-    faCheckCircle
+    faCheckCircle,
+    faBars
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -203,5 +206,6 @@ library.add(
     faSearch,
     faMailBulk,
     faPhone,
-    faCheckCircle
+    faCheckCircle,
+    faBars
 );

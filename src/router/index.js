@@ -133,6 +133,30 @@ export default new Router({
             component: () => import("@/components/layout/Layout"),
             children: [
                 {
+                    meta: {title: 'Flash Deals'},
+                    path: "/marketing/flash-deals",
+                    name: "Flash Deals",
+                    component: () => import("@/components/marketing/Flash")
+                },
+                {
+                    meta: {title: 'Newsletters'},
+                    path: "/marketing/newsletter",
+                    name: "Newsletters",
+                    component: () => import("@/components/marketing/Newsletter")
+                },
+                {
+                    meta: {title: 'Create New Flash Deals'},
+                    path: "/marketing/flash-deals-create",
+                    name: "Flash Deals Create",
+                    component: () => import("@/components/marketing/NewFlash")
+                },
+                {
+                    meta: {title: 'Supplier Flash Deals'},
+                    path: "/marketing/flash-deals-supplier",
+                    name: "Supplier Flash Deals",
+                    component: () => import("@/components/marketing/FlashRequest")
+                },
+                {
                     meta: {title: 'Quotation List'},
                     path: "/marketing/quotation",
                     name: "Quotation List",
@@ -167,6 +191,12 @@ export default new Router({
                     path: "/frontend/general-settings",
                     name: "General Settings",
                     component: () => import("@/components/frontend/General")
+                },
+                {
+                    meta: {title: 'Testimonial'},
+                    path: "/frontend/testimonial",
+                    name: "Testimonial",
+                    component: () => import("@/components/frontend/Testimonial")
                 },
                 {
                     meta: {title: 'Logo Settings '},

@@ -76,6 +76,14 @@ export default [
                 icon: 'cil-bullhorn',
                 items: [
                     {
+                        name: 'Flash Deals',
+                        to: '/marketing/flash-deals'
+                    },
+                    {
+                        name: 'Newsletters',
+                        to: '/marketing/newsletter'
+                    },
+                    {
                         name: 'Quotation',
                         to: '/marketing/quotation'
                     },
@@ -114,6 +122,10 @@ export default [
                     {
                         name: 'General Settings',
                         to: '/frontend/general-settings'
+                    },
+                    {
+                        name: 'Testimonial',
+                        to: '/frontend/testimonial'
                     },
                     {
                         name: 'Logo Settings',

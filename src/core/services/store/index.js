@@ -14,6 +14,11 @@ import attribute from './module/attribute';
 import currency from './module/currency';
 import homeslider from "@/core/services/store/module/homeslider";
 import quotation from "@/core/services/store/module/quotation";
+import page_manage from "@/core/services/store/module/page_manage";
+import help from "@/core/services/store/module/help";
+import flash_deals from "@/core/services/store/module/flash_deals";
+import newsletter from "@/core/services/store/module/newsletter";
+import testimonial from "@/core/services/store/module/testimonial";
 
 Vue.use(Vuex)
 
@@ -66,5 +71,10 @@ export default new Vuex.Store({
         currency,
         homeslider,
         quotation,
+        page_manage,
+        help,
+        flash_deals,
+        newsletter,
+        testimonial,
     }
 })
